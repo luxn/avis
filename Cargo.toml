@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["luxn"]
 
 [dependencies]
+cgmath = "0.15.0"
+glium = "0.17.0"
