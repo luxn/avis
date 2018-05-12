@@ -1,43 +1,49 @@
-extern crate cgmath;
-extern crate glium;
 extern crate rand;
 
+#[macro_use]
+extern crate vulkano;
+
+extern crate vulkano_win;
+
+extern crate winit;
+
+
+use vulkano::instance::Instance;
+use vulkano::instance::InstanceExtensions;
+
+use vulkano_win::VkSurfaceBuild;
+
+use winit::EventsLoop;
+use winit::WindowBuilder;
+
+fn main() {   
+    let instance = {
+        let extensions = vulkano_win::required_extensions();
+        Instance::new(None, &extensions, None).expect("failed to create vkInstance")
+    };
+
+    let mut events_loop = EventsLoop::new();
+
+    let window = WindowBuilder::new().build_vk_surface(&events_loop, instance.clone()).unwrap();
+
+    events_loop.run_forever(|event| {
+        match event {
+            winit::Event::WindowEvent { event: winit::WindowEvent::Closed, .. } => {
+                winit::ControlFlow::Break
+            },
+            _ => winit::ControlFlow::Continue
+        }
+    });
+
+}
+
+
+/*
 mod graphics;
 mod math;
 mod scene;
 mod utils;
+*/
 
-use glium::{glutin, Surface};
 
 
-use utils::file;
-
-fn main() {   
-
-    let result = file::load_shader_from_file("Hallo.welt".into());
-    
-
-    let mut events_loop = glutin::EventsLoop::new();
-    let window = glutin::WindowBuilder::new();
-    let context = glutin::ContextBuilder::new();
-    let display = glium::Display::new(window, context, &events_loop).unwrap();
-
-    let mut closed = false;
-
-    while !closed {
-        events_loop.poll_events(|ev| {
-            match ev {
-                glutin::Event::WindowEvent {event, ..} => match event {
-                    glutin::WindowEvent::Closed => closed = true,
-                    _ => (),
-                },
-                _ => (),
-            }
-        });
-
-        let mut target = display.draw();
-        target.clear_color(0.0, 0.0, 1.0, 1.0);
-        target.finish().unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(17));
-    }
-}

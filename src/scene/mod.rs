@@ -1,5 +1,4 @@
 use std::rc::Weak;
-use glium;
 
 pub struct SceneGraph {
     root_node: SceneNode
@@ -10,7 +9,7 @@ impl SceneGraph {
     
     
 
-    fn render(&self, mut frame: &glium::Frame) {
+    fn render(&self, mut frame: String) {
 
     }
 }
@@ -21,13 +20,13 @@ pub struct SceneNode {
 }
 
 impl SceneNode {
-    fn render(&self, mut frame: &glium::Frame) {
+    fn render(&self,frame: String) {
 
         //self
 
         //children
         for node in &self.children {
-            node.render(&mut frame);
+            // todo
         }
     }
 }

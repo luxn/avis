@@ -18,7 +18,7 @@ impl Random {
         }
     }
 
-    fn from_seed(seed: Vec<usize>) -> Random {   
+    fn new_with_seed(seed: Vec<usize>) -> Random {   
         let rng = SeedableRng::from_seed(seed.as_slice());
 
         Random {
