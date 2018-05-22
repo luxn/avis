@@ -11,9 +11,8 @@ pub fn load_shader_from_file(path: &str) -> Result<String, std::io::Error> {
             return Err(e);
         }
     };
-    let mut buf_reader = BufReader::new(file);
-    let mut contents = String::new();
-    buf_reader.read_to_string(&mut contents)?;
-    Ok(contents)
+    let mut buffer = String::new()
+    file.read_to_string(&mut buffer)?;
+    Ok(buffer)
 } 
 

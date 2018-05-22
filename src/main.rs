@@ -1,49 +1,21 @@
 extern crate rand;
-
 #[macro_use]
 extern crate vulkano;
-
 extern crate vulkano_win;
-
 extern crate winit;
 
+mod graphics;
 
-use vulkano::instance::Instance;
-use vulkano::instance::InstanceExtensions;
+fn main() {      
 
-use vulkano_win::VkSurfaceBuild;
+    let instance = graphics::vulkan::init_vulkan();
 
-use winit::EventsLoop;
-use winit::WindowBuilder;
+    graphics::vulkan::print_vulkan_debug_infos(instance.clone());
 
-fn main() {   
-    let instance = {
-        let extensions = vulkano_win::required_extensions();
-        Instance::new(None, &extensions, None).expect("failed to create vkInstance")
-    };
+    let mut window = graphics::window::Window::new(instance.clone());
 
-    let mut events_loop = EventsLoop::new();
+    println!("Window {}px x {}px with Name '{}'", window.width, window.height, window.title);
 
-    let window = WindowBuilder::new().build_vk_surface(&events_loop, instance.clone()).unwrap();
-
-    events_loop.run_forever(|event| {
-        match event {
-            winit::Event::WindowEvent { event: winit::WindowEvent::Closed, .. } => {
-                winit::ControlFlow::Break
-            },
-            _ => winit::ControlFlow::Continue
-        }
-    });
+    window.run();
 
 }
-
-
-/*
-mod graphics;
-mod math;
-mod scene;
-mod utils;
-*/
-
-
-
