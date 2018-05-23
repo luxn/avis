@@ -16,3 +16,10 @@ Possible Features to learn:
 * P2P Networking
 * Scripting (Lua)
 * UI
+
+
+# Threads
+Input Handling Thread
+Rendering Thread
+Resource Thread
+Main Thread (Give them the ticks!)

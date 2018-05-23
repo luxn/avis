@@ -1,21 +1,39 @@
 extern crate rand;
-#[macro_use]
+//#[macro_use]
 extern crate vulkano;
 extern crate vulkano_win;
 extern crate winit;
 
 mod graphics;
+mod utils;
+
+use std::{thread, time};
+use std::sync::mpsc::channel;
+
 
 fn main() {      
 
-    let instance = graphics::vulkan::init_vulkan();
+    let (sender, receiver) = channel();
+   
+   let renderer = graphics::RenderManager::new(receiver);
 
-    graphics::vulkan::print_vulkan_debug_infos(instance.clone());
+   sender.send(utils::itc::ITCStatus::Start);    
 
-    let mut window = graphics::window::Window::new(instance.clone());
+    let mut window = graphics::window::Window::new(renderer.get_vk_instance());
 
     println!("Window {}px x {}px with Name '{}'", window.width, window.height, window.title);
+    
+    let hundred_millis = time::Duration::from_millis(100);
+    loop {
+        println!("Sending Tick");
+        sender.send(utils::itc::ITCStatus::Tick);
+        thread::sleep(hundred_millis);
 
-    window.run();
+        //Health Check
+        if !renderer.is_running() {
+            break;
+        }
+    }
+    //window.run();
 
 }
