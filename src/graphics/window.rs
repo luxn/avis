@@ -20,7 +20,7 @@ impl Window{
     pub fn new(instance: Arc<Instance>) -> Window {      
 
         let events_loop = EventsLoop::new();
-        let window = WindowBuilder::new().with_dimensions(1024, 768).with_title("Avis").build_vk_surface(&events_loop, instance).unwrap(); 
+        let window = WindowBuilder::new().with_dimensions((1024, 768).into()).with_title("Avis").build_vk_surface(&events_loop, instance).unwrap();
 
         Window {
             width: 1024,
@@ -34,7 +34,7 @@ impl Window{
     pub fn run(&mut self) {
         self.events_loop.run_forever(|event| {
             match event {
-                winit::Event::WindowEvent { event: winit::WindowEvent::Closed, .. } => {
+                winit::Event::WindowEvent { event: winit::WindowEvent::CloseRequested, .. } => {
                     winit::ControlFlow::Break
                 },
                 _ => winit::ControlFlow::Continue

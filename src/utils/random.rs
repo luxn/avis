@@ -1,5 +1,7 @@
+/*
 use rand;
-use rand::{Rng, SeedableRng, StdRng, Rand};
+use rand::prelude::*;
+use rand::{Rng, SeedableRng, StdRng, R};
 
 pub struct Random {
     rng: StdRng,
@@ -18,22 +20,24 @@ impl Random {
         }
     }
 
-    fn new_with_seed(seed: Vec<usize>) -> Random {   
-        let rng = SeedableRng::from_seed(seed.as_slice());
+    fn new_with_seed(seed: &[usize]) -> Random {
+        let rng = SeedableRng::from_seed(seed);
 
         Random {
-            rng: rng,
-            seed: seed
+            rng,
+            seed: Vec::from(seed)
         }
     }
 
-    fn reseed(&mut self, seed: Vec<usize>) {
-        self.rng.reseed(seed.as_slice());
-        self.seed = seed;
+    fn reseed(&mut self, seed: &[usize]) {
+        self.rng.
+        self.rng.reseed(seed);
+        self.seed = Vec::from(seed);
     }
 
-    fn next<T: Rand>(&mut self) -> T {
-        self.rng.gen::<T>()
+    fn next<T>(&mut self) -> T {
+        self.rng.gen()
     }
 
 }
+*/

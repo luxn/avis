@@ -4,29 +4,40 @@ extern crate vulkano;
 extern crate vulkano_win;
 extern crate winit;
 
-mod graphics;
-mod utils;
-
-use std::{thread, time};
 use std::sync::mpsc::channel;
+use std::{thread, time};
+
+mod utils;
+mod graphics;
 
 
-fn main() {      
+
+const fn foo(x: i32) -> i32 {
+    x + 1
+}
+
+const SIX: i32 = foo(5);
+
+fn main() {
+    println!("Hello World!");
 
     let (sender, receiver) = channel();
-   
-   let renderer = graphics::RenderManager::new(receiver);
 
-   sender.send(utils::itc::ITCStatus::Start);    
+    let renderer = graphics::RenderManager::new(receiver);
+
+    sender.send(utils::itc::ITCStatus::Start).unwrap();
 
     let mut window = graphics::window::Window::new(renderer.get_vk_instance());
 
-    println!("Window {}px x {}px with Name '{}'", window.width, window.height, window.title);
-    
+    println!(
+        "Window {}px x {}px with Name '{}'",
+        window.width, window.height, window.title
+    );
+
     let hundred_millis = time::Duration::from_millis(100);
     loop {
         println!("Sending Tick");
-        sender.send(utils::itc::ITCStatus::Tick);
+        sender.send(utils::itc::ITCStatus::Tick).unwrap();
         thread::sleep(hundred_millis);
 
         //Health Check
@@ -34,6 +45,5 @@ fn main() {
             break;
         }
     }
-    //window.run();
-
+    window.run();
 }

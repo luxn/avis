@@ -3,7 +3,7 @@ pub mod window;
 
 use vulkano;
 
-use utils::itc::ITCStatus;
+use crate::utils::itc::ITCStatus;
 
 use std::sync::Arc;
 use std::sync::mpsc;
@@ -14,21 +14,19 @@ use std::sync::Mutex;
 
 
  fn run(receiver: mpsc::Receiver<ITCStatus>) -> Result<ITCStatus, RecvError> {
-        println!("Starting");
-        let mut counter = 0;
-        loop {
-            let res = receiver.recv()?;
-            println!("{}, {:?}", counter, res);
-            counter += 1;
-
-            if counter >= 10 {
-                break;
-            }
-        }
-        println!("Ending");
-        Ok(ITCStatus::Shutdown)
-    }
-
+     println!("Starting");
+     let mut counter = 0;
+     loop {
+         let res = receiver.recv()?;
+         println!("{}, {:?}", counter, res);
+         counter += 1;
+         if counter >= 10 {
+             break;
+         }
+     }
+     println!("Ending");
+     Ok(ITCStatus::Shutdown)
+ }
 pub struct RenderManager {
     vk_instance: Arc<vulkano::instance::Instance>,
     vk_device: Arc<vulkano::device::Device>,
@@ -44,8 +42,12 @@ impl RenderManager {
     pub fn new(recv: mpsc::Receiver<ITCStatus>) -> Self {
 
         let instance = vulkan::init_vulkan(); 
+        println!("Hier2");
+
 
         let (device, mut queues) = vulkan::get_device_and_queues(instance.clone());
+
+        vulkan::print_vulkan_debug_infos(instance.clone());
 
         //let recv_clone = recv.clone();
 

@@ -2,8 +2,8 @@ use vulkano::instance::Instance;
 //use vulkano::instance::InstanceExtensions;
 use vulkano::instance::PhysicalDevice;
 use vulkano::device::Device;
+use vulkano::device::Features;
 use vulkano::device::QueuesIter;
-use vulkano::instance::Features;
 use vulkano::device::DeviceExtensions;
 
 use vulkano_win;
@@ -13,6 +13,7 @@ use std::sync::Arc;
 pub fn init_vulkan() -> Arc<Instance> {
     let instance: Arc<Instance> = {        
         let extensions = vulkano_win::required_extensions();
+        println!("Hier");
         Instance::new(None, &extensions, None).expect("failed to create vkInstance")       
     };
     instance
@@ -40,13 +41,18 @@ pub fn print_vulkan_debug_infos(instance: Arc<Instance>) {
 
 pub fn get_device_and_queues(instance: Arc<Instance>) -> (Arc<Device>, QueuesIter) {
 
-    let physical = PhysicalDevice::enumerate(&instance).next().unwrap();
+    let physical = PhysicalDevice::enumerate(&instance)
+        .next()
+        .expect("no device available");
 
     let queue_family = physical.queue_families()
         .find(|&q| q.supports_graphics())
         .expect("couldn't find a graphical queue family");
 
     //0.5 is a priority for the given queue_family
-    Device::new(physical, &Features::none(), &DeviceExtensions::none(),
-                [(queue_family, 0.5)].iter().cloned()).expect("failed to create device")
+    Device::new(physical,
+                &Features::none(),
+                &DeviceExtensions::none(),
+                [(queue_family, 0.5)].iter().cloned())
+        .expect("failed to create device")
 }
