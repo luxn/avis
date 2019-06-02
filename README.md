@@ -1,8 +1,8 @@
 # avis
-Rust WIP Vulkan RTS Game 
+Rust WIP RTS Game 
 (think of WC2 / WC3 / StarCraft / C&C / Spellforce etc.)
 
-***teaching myself Rust and Vulkan besides Studies of Geoinformatics and Computer Science, more likely an offwork project than a serious one***
+***teaching myself Rust and OpenGL (and at some point Vulkan) besides Studies of Geoinformatics and Computer Science, more likely an offwork project than a serious one***
 
 Heavily inspired by:
 * Game Engine Architecture - Jason Gregory -  2nd Edition - 2014
@@ -15,7 +15,7 @@ Possible Features to learn:
 * Shaders
 * P2P Networking
 * Scripting (Lua)
-* UI
+* UI (maybe HTML?!)
 
 
 # Threads
