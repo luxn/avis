@@ -1,5 +1,6 @@
 extern crate gl;
 extern crate glfw;
+extern crate image;
 
 mod graphics;
 mod input;
@@ -14,10 +15,21 @@ use gl::types::*;
 use std::os::raw::c_void;
 use std::ptr;
 
-use graphics::opengl::{ Renderer, Loader, create_static_shader };
+use crate::graphics::opengl::{TexturedModel, ModelTexture, Renderer, Loader, create_static_shader};
 
+
+fn load_attribute(name: &'static str, value: f32) {
+    // TODO
+}
+
+
+const PI: f32 = std::f32::consts::PI;
 
 fn main() {
+
+
+    load_attribute("Test", PI);
+
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
     glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
     glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
@@ -50,7 +62,20 @@ fn main() {
         3,1,2   //bottom right triangle (v3, v1, v2)
     ];
 
-    let model = loader.load_to_vao(&vertices, &indices);
+    let texture_coordinates = vec![
+        1.0, 0.0,    //v0
+        0.0, 0.0,    //v1
+        0.0, 1.0,    //v2
+        1.0, 1.0,    //v3
+    ];
+
+
+    let textured_model = {
+        let model = loader.load_to_vao(&vertices, &texture_coordinates, &indices);
+        let texture_id = loader.load_texture("res/textures/smiley.png");
+        let texture = ModelTexture::new(texture_id);
+        TexturedModel::new(model, texture)
+    };
 
     let shader = create_static_shader();
 
@@ -60,7 +85,7 @@ fn main() {
         renderer.prepare();
         shader.start();
 
-        renderer.render(&model);
+        renderer.render(&textured_model);
 
         shader.stop();
 
@@ -75,10 +100,5 @@ fn main() {
             }
         }
     }
-
-
-
-
-
 }
 

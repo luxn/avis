@@ -7,24 +7,25 @@ use gl::types::*;
 use std::ffi::{CString, CStr};
 use std::{ptr, fmt};
 use std::process::exit;
+use crate::math::Vector3f;
 
-pub struct Shader {
+pub struct ShaderProgram {
     program_id: u32,
     vertex_shader_id: u32,
     fragment_shader_id: u32,
 }
 
 #[derive(Copy,Clone)]
-pub enum ShaderType {
+pub enum ShaderProgramType {
     Vertex,
     Fragment
 }
 
-impl fmt::Display for ShaderType {
+impl fmt::Display for ShaderProgramType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let printable = match *self {
-            ShaderType::Vertex => "VERTEX",
-            ShaderType::Fragment => "FRAGMENT",
+            ShaderProgramType::Vertex => "VERTEX",
+            ShaderProgramType::Fragment => "FRAGMENT",
         };
         write!(f, "{}", printable)
     }
@@ -32,16 +33,26 @@ impl fmt::Display for ShaderType {
 
 
 
-impl Shader {
+impl ShaderProgram {
 
-    fn new(vertex_file: String, fragment_file: String) -> Shader {
-        let vertex_shader_id = Shader::load_shader(vertex_file, ShaderType::Vertex);
-        let fragment_shader_id = Shader::load_shader(fragment_file, ShaderType::Fragment);
+    fn new(vertex_file: String, fragment_file: String) -> ShaderProgram {
+        let vertex_shader_id = ShaderProgram::load_shader(vertex_file, ShaderProgramType::Vertex);
+        let fragment_shader_id = ShaderProgram::load_shader(fragment_file, ShaderProgramType::Fragment);
 
         unsafe {
             let program_id = gl::CreateProgram();
+
+            let instance = ShaderProgram {
+                program_id,
+                vertex_shader_id,
+                fragment_shader_id
+            };
+
             gl::AttachShader(program_id, vertex_shader_id);
             gl::AttachShader(program_id, fragment_shader_id);
+
+            instance.bind_attributes();
+
             gl::LinkProgram(program_id);
 
             // check for linking errors
@@ -55,16 +66,20 @@ impl Shader {
                 exit(-1);
             }
 
-            let instance = Shader {
-                program_id,
-                vertex_shader_id,
-                fragment_shader_id
-            };
-
-
+            instance.get_all_uniform_locations();
 
             instance
         }
+    }
+
+    fn get_uniform_location(&self, uniform_name: &CString) -> u32 {
+        unsafe {
+            gl::GetUniformLocation(self.program_id, uniform_name.as_ptr()) as u32
+        }
+    }
+
+    fn get_all_uniform_locations(&self) {
+
     }
 
     pub fn start(&self) {
@@ -80,17 +95,47 @@ impl Shader {
     }
 
     fn bind_attributes(&self) {
-        self.bind_attribute(0, CString::new("position").unwrap())
+        self.bind_attribute(0, &CString::new("position").unwrap());
+        self.bind_attribute(1, &CString::new("textureCoords").unwrap());
+
     }
 
-    fn bind_attribute(&self, attribute: u32, variable_name: CString) {
+    fn bind_attribute(&self, attribute: u32, variable_name: &CString) {
         unsafe {
             gl::BindAttribLocation(self.program_id, attribute, variable_name.as_ptr());
         }
     }
 
+    fn load_float(location: i32, value: f32) {
+        unsafe {
+            gl::Uniform1f(location, value);
+        }
+    }
 
-    fn load_shader(file: String, shader_type: ShaderType) -> u32 {
+    fn load_vector(location: i32, vector: &Vector3f) {
+        unsafe {
+            gl::Uniform3f(location, vector.x, vector.y, vector.z);
+        }
+    }
+
+    fn load_bool(location: i32, value: bool) {
+        unsafe {
+            if value {
+                gl::Uniform1f(location, 1.0f32);
+            } else{
+                gl::Uniform1f(location, 0.0f32);
+            }
+        }
+    }
+
+    //fn load_matrix(location: u32, value: Matrix4f) {
+    //    unsafe {
+    //        //gl::UniformMatrix4(location, false, )
+    //    }
+    //}
+
+
+    fn load_shader(file: String, shader_type: ShaderProgramType) -> u32 {
         let shader_data = {
             let mut file = File::open(file).unwrap();
             let mut buffer = String::new();
@@ -101,8 +146,8 @@ impl Shader {
         let shader_data_cstr = CString::new(shader_data.as_bytes()).unwrap();
 
         let gl_shader_type = match shader_type {
-            ShaderType::Vertex => gl::VERTEX_SHADER,
-            ShaderType::Fragment => gl::FRAGMENT_SHADER,
+            ShaderProgramType::Vertex => gl::VERTEX_SHADER,
+            ShaderProgramType::Fragment => gl::FRAGMENT_SHADER,
         };
 
         unsafe {
@@ -128,7 +173,7 @@ impl Shader {
 }
 
 
-impl Drop for Shader {
+impl Drop for ShaderProgram {
     fn drop(&mut self) {
         self.stop();
         unsafe {
@@ -143,9 +188,9 @@ impl Drop for Shader {
 }
 
 
-pub fn create_static_shader() -> Shader {
-    let vert = String::from("src/graphics/opengl/shaders/vertexShader.txt");
-    let frag = String::from("src/graphics/opengl/shaders/fragmentShader.txt");
+pub fn create_static_shader() -> ShaderProgram {
+    let vert = String::from("res/shaders/vertexShader.txt");
+    let frag = String::from("res/shaders/fragmentShader.txt");
 
-    Shader::new(vert, frag)
+    ShaderProgram::new(vert, frag)
 }

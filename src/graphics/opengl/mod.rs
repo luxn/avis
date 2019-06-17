@@ -1,10 +1,13 @@
 mod loader;
-mod raw_model;
 mod renderer;
 
 mod shaders;
+mod textures;
+mod models;
 
 pub use loader::*;
-pub use raw_model::*;
 pub use renderer::*;
+
 pub use shaders::*;
+pub use textures::*;
+pub use models::*;
