@@ -1,10 +1,10 @@
 extern crate gl;
 extern crate glfw;
 extern crate image;
+extern crate glam;
 
 mod graphics;
 mod input;
-mod math;
 mod scene;
 mod utils;
 

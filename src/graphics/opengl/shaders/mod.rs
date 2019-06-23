@@ -7,12 +7,13 @@ use gl::types::*;
 use std::ffi::{CString, CStr};
 use std::{ptr, fmt};
 use std::process::exit;
-use crate::math::Vector3f;
+use glam::{Vec2, Mat4, Vec3};
 
 pub struct ShaderProgram {
     program_id: u32,
     vertex_shader_id: u32,
     fragment_shader_id: u32,
+    location_transformation_matrix: i32
 }
 
 #[derive(Copy,Clone)]
@@ -42,10 +43,11 @@ impl ShaderProgram {
         unsafe {
             let program_id = gl::CreateProgram();
 
-            let instance = ShaderProgram {
+            let mut instance = ShaderProgram {
                 program_id,
                 vertex_shader_id,
-                fragment_shader_id
+                fragment_shader_id,
+                location_transformation_matrix: 0
             };
 
             gl::AttachShader(program_id, vertex_shader_id);
@@ -72,14 +74,20 @@ impl ShaderProgram {
         }
     }
 
-    fn get_uniform_location(&self, uniform_name: &CString) -> u32 {
+    fn get_uniform_location(&self, uniform_name: &CString) -> i32 {
         unsafe {
-            gl::GetUniformLocation(self.program_id, uniform_name.as_ptr()) as u32
+            gl::GetUniformLocation(self.program_id, uniform_name.as_ptr()) as i32
         }
     }
 
-    fn get_all_uniform_locations(&self) {
+    fn get_all_uniform_locations(&mut self) {
+        let uniform_transformation_matrix = CString::new("transformationMatrix").unwrap();
+        self.location_transformation_matrix = self.get_uniform_location(&uniform_transformation_matrix);
 
+    }
+
+    fn load_transformation_matrix(&self, mat: &Mat4) {
+        self.load_matrix(self.location_transformation_matrix, mat);
     }
 
     pub fn start(&self) {
@@ -106,19 +114,19 @@ impl ShaderProgram {
         }
     }
 
-    fn load_float(location: i32, value: f32) {
+    fn load_float(&self,location: i32, value: f32) {
         unsafe {
             gl::Uniform1f(location, value);
         }
     }
 
-    fn load_vector(location: i32, vector: &Vector3f) {
+    fn load_vector(&self,location: i32, vector: &Vec3) {
         unsafe {
-            gl::Uniform3f(location, vector.x, vector.y, vector.z);
+            gl::Uniform3f(location, vector.x(), vector.y(), vector.z());
         }
     }
 
-    fn load_bool(location: i32, value: bool) {
+    fn load_bool(&self,location: i32, value: bool) {
         unsafe {
             if value {
                 gl::Uniform1f(location, 1.0f32);
@@ -128,11 +136,12 @@ impl ShaderProgram {
         }
     }
 
-    //fn load_matrix(location: u32, value: Matrix4f) {
-    //    unsafe {
-    //        //gl::UniformMatrix4(location, false, )
-    //    }
-    //}
+    fn load_matrix(&self, location: i32, value: &Mat4) {
+        unsafe {
+            let ptr: *const f32 = std::mem::transmute(value);
+            gl::UniformMatrix4fv(location, (4 * 4) as GLsizei, gl::FALSE, ptr)
+        }
+    }
 
 
     fn load_shader(file: String, shader_type: ShaderProgramType) -> u32 {
