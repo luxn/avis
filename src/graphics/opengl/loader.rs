@@ -6,13 +6,15 @@ use gl;
 use gl::types::*;
 
 use image;
-use image::{GenericImageView};
+use image::{GenericImageView, DynamicImage};
+use std::any::Any;
 
 
 pub struct Loader {
     vaos: Vec<u32>,
     vbos: Vec<u32>,
-    textures: Vec<u32>
+    textures: Vec<u32>,
+    images: Vec<DynamicImage>
 }
 
 impl Loader {
@@ -22,7 +24,8 @@ impl Loader {
         Loader {
             vaos: Vec::new(),
             vbos: Vec::new(),
-            textures: Vec::new()
+            textures: Vec::new(),
+            images: Vec::new()
         }
     }
 
@@ -40,10 +43,24 @@ impl Loader {
 
 
     pub fn load_texture(&mut self, file_name: &str) -> u32 {
-        let img = image::open(file_name).expect("Unable to load Texture");
+        let mut img = image::open(file_name).expect("Unable to load Texture");
 
         let mut texture_id = 0;
-        let data = img.raw_pixels();
+        let data = match img {
+            DynamicImage::ImageLuma8(ref a) => a.as_ptr(),
+
+            DynamicImage::ImageLumaA8(ref a) => a.as_ptr(),
+
+            DynamicImage::ImageRgb8(ref a) => a.as_ptr(),
+
+            DynamicImage::ImageRgba8(ref a) => a.as_ptr(),
+
+            DynamicImage::ImageBgr8(ref a) => a.as_ptr(),
+
+            DynamicImage::ImageBgra8(ref a) => a.as_ptr(),
+
+            _ => { panic!("unsupported image type") }
+        };
 
         unsafe {
             gl::GenTextures(1, &mut texture_id);
@@ -57,7 +74,16 @@ impl Loader {
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
 
-            gl::TexImage2D(gl::TEXTURE_2D, 0, gl::RGB as i32, img.width() as i32, img.height() as i32, 0, gl::RGB, gl::UNSIGNED_BYTE, &data[0] as *const u8 as *const c_void);
+            gl::TexImage2D(
+                gl::TEXTURE_2D, 0,
+                gl::RGB as i32,
+                img.width() as i32,
+                img.height() as i32,
+                0,
+                gl::RGB,
+                gl::UNSIGNED_BYTE,
+                data as *const c_void
+            );
             gl::GenerateMipmap(gl::TEXTURE_2D);
         }
 

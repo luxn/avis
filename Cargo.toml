@@ -5,7 +5,7 @@ authors = ["luxn"]
 edition = "2018"
 
 [dependencies]
-gl = "0.12.0"
-glfw = "0.28.0"
-image = "0.21.2"
-glam = "0.6.1"
+gl = "0.14.0"
+glfw = "0.39.1"
+image = "0.23.8"
+glam = "0.9.2"
